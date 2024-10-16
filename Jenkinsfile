@@ -1,53 +1,52 @@
 pipeline {
     agent any
-
     environment {
         DOCKER_IMAGE = 'thejanmv/python-todo-app:latest'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
-        GIT_CREDENTIALS_ID = 'github-credentials'
+        GITHUB_CREDENTIALS = 'github-credentials'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
     }
-
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01', credentialsId: "${GITHUB_CREDENTIALS}"
             }
         }
-        
         stage('Build Docker Image') {
             steps {
-                script {
-                    bat "docker build -t ${DOCKER_IMAGE} ."
-                }
+                bat 'docker build -t thejanmv/python-todo-app:latest .'
             }
         }
-
         stage('Test') {
+            when {
+                expression {
+                    return fileExists('tests') // Check if tests directory exists
+                }
+            }
             steps {
                 echo 'Running test...'
-                script {
-                    bat "docker run --rm ${DOCKER_IMAGE} pytest"
-                }
+                bat 'docker run --rm thejanmv/python-todo-app:latest pytest'
             }
         }
-
         stage('Push to Docker Hub') {
             when {
-                expression { currentBuild.currentResult == 'SUCCESS' }
+                not {
+                    stageResult 'Test'
+                }
             }
             steps {
+                echo 'Pushing to Docker Hub...'
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        bat "docker push ${DOCKER_IMAGE}"
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKERHUB_CREDENTIALS}") {
+                        bat 'docker push thejanmv/python-todo-app:latest'
                     }
                 }
             }
         }
     }
-
     post {
         always {
             cleanWs()
+            echo 'Build or tests completed!'
         }
         failure {
             echo 'Build or tests failed!'
