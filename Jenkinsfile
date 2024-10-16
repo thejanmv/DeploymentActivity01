@@ -31,7 +31,7 @@ pipeline {
     }
     post {
         always {
-            node {
+            node('any') {  // Specify the agent label 'any' to execute the cleanup step
                 cleanWs()
             }
         }
