@@ -32,13 +32,12 @@ pipeline {
         }
         stage('Deploy to EC2') {
             steps {
-                sshagent(['ec2-key']) {
+                sshagent(['ec2-user']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ec2-user@ec2-18-209-30-124.compute-1.amazonaws.com << 'EOF'
-                    docker pull lithmiseneviratne/python-todo-app:latest
-                    docker stop $(docker ps -q --filter "ancestor=lithmiseneviratne/python-todo-app")
-                    docker run -d -p 0:5000 your-dockerhub-username/python-todo-app:latest
-                    EOF
+                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-18-209-30-124.compute-1.amazonaws.com '
+                        docker stop $(docker ps -q) || true &&
+                        docker pull lithmiseneviratne/python-todo-app:latest &&
+                        docker run -d -p 80:5000 lithmiseneviratne/python-todo-app:latest'
                     '''
                 }
             }
