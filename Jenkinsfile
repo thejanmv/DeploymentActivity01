@@ -9,44 +9,51 @@ pipeline {
         CONTAINER_NAME = 'python-todo-app'
         PORT = '5000'
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
+                // Checkout code from GitHub
                 git url: 'https://github.com/thejanmv/DeploymentActivity01.git', credentialsId: 'github-credentials'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat 'docker build -t lithmiseneviratne/python-todo-app:65 .'
+                    // Use bat for Windows and sh for Linux
+                    bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 script {
-                    sh "docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${DOCKER_IMAGE}"
+                    // Run the Docker container in detached mode
+                    sh "docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
         stage('Push Docker Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    // Use withCredentials for Docker Hub login
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
-                        bat "docker push lithmiseneviratne/python-todo-app:65"
+                        bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
                     }
                 }
             }
         }
-
-        
-        
     }
     post {
         always {
-            cleanWs()
+            // Cleanup workspace after the build
+            script {
+                // Stop and remove the Docker container after the build
+                bat "docker stop ${CONTAINER_NAME} || true"
+                bat "docker rm ${CONTAINER_NAME} || true"
+            }
+            cleanWs() // Clean the workspace
         }
     }
 }
