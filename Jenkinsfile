@@ -41,14 +41,10 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                script {
-                    // Direct SSH command to connect and deploy on EC2
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no \
-                        -i /var/lib/jenkins/.ssh/new_key_pair.pem \
-                        ec2-user@<EC2_PUBLIC_IP> "echo 'Deployment successful!'"
-                    '''
-                }
+                // Use PowerShell or bat commands for Windows
+                bat '''
+                    ssh -o StrictHostKeyChecking=no -i C:/ProgramData/Jenkins/.ssh/new_key_pair.pem ec2-user@ec2-54-145-210-17.compute-1.amazonaws.com "echo 'Deployment Successful!'"
+                '''
             }
         }
         
