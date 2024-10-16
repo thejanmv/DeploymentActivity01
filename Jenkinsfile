@@ -31,8 +31,8 @@ pipeline {
     }
     post {
         always {
-            node {
-                cleanWs()  // Workspace cleanup inside node context
+            node('any') {  // Ensure a valid node context for post actions
+                cleanWs()  // Workspace cleanup
             }
         }
         success {
