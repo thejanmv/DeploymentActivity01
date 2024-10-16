@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01'
+                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01.git'  // Git repository URL
             }
         }
 
