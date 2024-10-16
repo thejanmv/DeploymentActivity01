@@ -41,12 +41,12 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                sshagent(['ec2-jenkins']) {
+                sshagent(credentials: ['ec2-jenkins']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no $EC2_HOST << EOF
-                        docker pull $DOCKER_IMAGE:$DOCKER_TAG
-                        docker stop $(docker ps -q) || true
-                        docker run -d -p 80:5000 $DOCKER_IMAGE:$DOCKER_TAG
+                        ssh -o StrictHostKeyChecking=no ec2-user@<EC2-PUBLIC-IP> << EOF
+                        docker stop $(docker ps -q)
+                        docker pull lithmiseneviratne/python-todo-app:latest
+                        docker run -d -p 80:5000 lithmiseneviratne/python-todo-app:latest
                         EOF
                     '''
                 }
