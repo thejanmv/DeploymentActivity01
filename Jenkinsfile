@@ -31,9 +31,7 @@ pipeline {
     }
     post {
         always {
-            node('any') {  // Specify the agent label 'any' to execute the cleanup step
-                cleanWs()
-            }
+            cleanWs()  // No need for node block, will run on the current node
         }
         success {
             echo 'Build and tests succeeded!'
