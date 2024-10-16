@@ -29,8 +29,8 @@ pipeline {
         }
         stage('Push to Docker Hub') {
             when {
-                not {
-                    stageResult 'Test'
+                expression {
+                    return currentBuild.result == null || currentBuild.result == 'SUCCESS'
                 }
             }
             steps {
