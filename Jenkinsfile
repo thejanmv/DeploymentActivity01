@@ -19,12 +19,13 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    docker.image(DOCKER_IMAGE).inside('-w /app') {
+                    docker.image(DOCKER_IMAGE).inside('-w //app') {
                         bat 'pytest tests/'
                     }
                 }
             }
         }
+
 
 
 
