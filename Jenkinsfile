@@ -14,23 +14,30 @@ pipeline {
             }
         }
 
-    stage('Test') {
-        steps {
-            script {
-                dockerImage.inside {
-                    // Ensure pytest runs inside the 'tests' directory
-                    sh 'pytest tests/'
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
                 }
             }
         }
-    }
+
+        stage('Test') {
+            steps {
+                script {
+                    dockerImage.inside {
+                        sh 'pytest tests/'
+                    }
+                }
+            }
+        }
 
         stage('Push to Docker Hub') {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
                         dockerImage.push("${env.BUILD_NUMBER}")
-                        dockerImage.push('latest')
+                        dockerImage.push("latest")
                     }
                 }
             }
@@ -39,7 +46,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()  // Clean up workspace after the build
+            cleanWs()
         }
     }
 }
