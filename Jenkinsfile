@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'thejanmv/to-do-app'
+        DOCKER_IMAGE = 'thejanmv/python-todo-app'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
         GITHUB_CREDENTIALS_ID = 'github-credentials'
     }
