@@ -31,16 +31,12 @@ pipeline {
     }
     post {
         always {
-            node {
-                cleanWs()  // Ensure workspace cleanup happens within the node context
-            }
-        }
-        success {
-            echo 'Build and tests succeeded!'
+            cleanWs()
+            echo 'Build or tests completed!'
         }
         failure {
             echo 'Build or tests failed!'
         }
-}
+    }
 
 }
