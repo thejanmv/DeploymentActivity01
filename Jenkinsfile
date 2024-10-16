@@ -7,7 +7,7 @@ pipeline {
         SSH_CREDENTIALS = "ec2-key"
         EC2_HOST = "ec2-user@ec2-54-145-210-17.compute-1.amazonaws.com"
         CONTAINER_NAME = 'python-todo-app'
-        PORT = '5000
+        PORT = '5000'
     }
     
     stages {
