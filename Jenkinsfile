@@ -24,14 +24,16 @@ pipeline {
                 expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
-                bat 'docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}'
+                bat 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
                 bat 'docker push thejanmv/python-todo-app:latest'
             }
         }
     }
     post {
         always {
-            cleanWs()  // Clean workspace without node block error
+            node {
+                cleanWs()  // Workspace cleanup inside node context
+            }
         }
         success {
             echo 'Build and tests succeeded!'
