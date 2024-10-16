@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'thejanmv/python-todo-app' // Ensure this follows the pattern '^[a-zA-Z0-9]+((\.|_|__|-+)[a-zA-Z0-9]+)*$'
-        DOCKER_REGISTRY = 'https://index.docker.io/v1/' // Docker Hub registry URL
-        DOCKER_CREDENTIALS_ID = 'your-docker-credentials-id' // Jenkins credentials ID for Docker Hub
+        DOCKER_IMAGE = 'thejanmv/python-todo-app'
+        DOCKER_REGISTRY = 'https://index.docker.io/v1/'
+        DOCKER_CREDENTIALS_ID = 'your-docker-credentials-id'
     }
 
     stages {
@@ -25,8 +25,9 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside {
-                        sh 'pytest'
+                    // Using Unix-style path
+                    docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside('-w /app') {
+                        sh 'pytest' // Ensure that pytest is installed in the Docker image
                     }
                 }
             }
