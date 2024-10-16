@@ -8,33 +8,36 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01', credentialsId: "${GIT_CREDENTIALS_ID}"
+                checkout scm
             }
         }
         
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat "docker build -t ${DOCKER_IMAGE} ."
+                    docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
-        stage('Test') {
+
+        stage('Run Tests') {
             steps {
-                echo 'Running tests...'
                 script {
-                    bat "docker run --rm ${DOCKER_IMAGE} pytest"
+                    docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside {
+                        sh 'pytest'
+                    }
                 }
             }
         }
-        stage('Push to Docker Hub') {
+
+        stage('Push Docker Image') {
             when {
-                expression { currentBuild.currentResult == 'SUCCESS' }
+                branch 'main'
             }
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        bat "docker push ${DOCKER_IMAGE}"
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").push('latest')
                     }
                 }
             }
