@@ -31,7 +31,7 @@ pipeline {
     }
     post {
         always {
-            node('any') {  // Ensure a valid node context for post actions
+            node('master') {  // Replace 'any' with 'master' or a valid label
                 cleanWs()  // Workspace cleanup
             }
         }
