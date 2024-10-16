@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/to-do-app'
+        DOCKER_IMAGE = 'thejanmv/to-do-app'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
         GITHUB_CREDENTIALS_ID = 'github-credentials'
     }
@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git credentialsId: "${GITHUB_CREDENTIALS_ID}", url: 'https://github.com/your-repo/DeploymentActivity01.git'
+                git credentialsId: "${GITHUB_CREDENTIALS_ID}", url: 'https://github.com/thejanmv/DeploymentActivity01.git'
             }
         }
 
