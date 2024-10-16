@@ -1,5 +1,11 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.8-slim'
+            label 'docker-agent'
+            args '-v /tmp:/tmp' // Optional: mount volume if needed
+        }
+    }
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
     }
@@ -11,29 +17,28 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t thejanmv/python-todo-app:latest .'
+                sh 'docker build -t thejanmv/python-todo-app:latest .'
             }
         }
         stage('Run Tests') {
             steps {
-                bat 'docker run --rm thejanmv/python-todo-app:latest pytest test_app.py'
+                sh 'docker run --rm thejanmv/python-todo-app:latest pytest test_app.py'
             }
         }
         stage('Push to Docker Hub') {
-            when {
-                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
-            }
             steps {
-                bat 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
-                bat 'docker push thejanmv/python-todo-app:latest'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                        sh 'docker push thejanmv/python-todo-app:latest'
+                    }
+                }
             }
         }
     }
     post {
         always {
-            node('master') {  // Replace 'any' with 'master' or a valid label
-                cleanWs()  // Workspace cleanup
-            }
+            cleanWs()
         }
         success {
             echo 'Build and tests succeeded!'
