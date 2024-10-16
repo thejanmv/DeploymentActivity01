@@ -34,7 +34,7 @@ pipeline {
             steps {
                 sshagent(['ec2-key']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-18-209-30-124.compute-1.amazonaws.com << EOF
+                        ssh -vvv -o StrictHostKeyChecking=no ec2-user@ec2-18-209-30-124.compute-1.amazonaws.com << EOF
                             set -e
                             echo "Connected to EC2 Instance"
                             uptime
