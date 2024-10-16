@@ -31,7 +31,9 @@ pipeline {
     }
     post {
         always {
-            cleanWs()  // No need for node block, will run on the current node
+            node {
+                cleanWs()  // Ensure workspace cleanup happens within the node context
+            }
         }
         success {
             echo 'Build and tests succeeded!'
@@ -39,5 +41,6 @@ pipeline {
         failure {
             echo 'Build or tests failed!'
         }
-    }
+}
+
 }
