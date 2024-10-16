@@ -1,18 +1,24 @@
 from app import app
+import sqlite3
 
-def test_create_task():
-    """Test creating a task with valid and invalid data."""
+def test_add_task():
+    """Test adding a task."""
     client = app.test_client()
-    
+
+    # Ensure the database is clean before the test
+    conn = sqlite3.connect('todo.db')
+    conn.execute('DELETE FROM tasks')  # Clear all tasks
+    conn.commit()
+    conn.close()
+
     # Test valid input
-    response = client.post('/tasks', data={'title': 'Sample Task'})
-    assert response.status_code == 200
-    assert b"Task created" in response.data
+    response = client.post('/add', data={'task': 'Test Task'})
+    assert response.status_code == 302  # Redirect to index
+    assert response.location.endswith(url_for('index'))  # Ensure redirect to home page
+
+    # Verify the task was added
+    conn = sqlite3.connect('todo.db')
+    tasks = conn.execute('SELECT * FROM tasks WHERE task="Test Task"').fetchall()
+    conn.close()
     
-    # Test invalid input (empty title)
-    response = client.post('/tasks', data={'title': ''})
-    assert response.status_code == 400
-    assert b"Error" in response.data
-
-
-
+    assert len(tasks) == 1  # Ensure the task was added

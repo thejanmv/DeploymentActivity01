@@ -1,47 +1,40 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_IMAGE = 'thejanmv/python-todo-app:latest'
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
     }
-
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01'
+                git 'https://github.com/thejanmv/DeploymentActivity01'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %DOCKER_IMAGE% .'
+                bat 'docker build -t thejanmv/python-todo-app:latest .'
             }
         }
-
         stage('Run Tests') {
             steps {
-                bat 'docker run --rm %DOCKER_IMAGE% pytest'
+                bat 'docker run --rm thejanmv/python-todo-app:latest pytest test_app.py'
             }
         }
-
         stage('Push to Docker Hub') {
             when {
-                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
-                    bat 'docker push %DOCKER_IMAGE%'
-                }
+                bat 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                bat 'docker push thejanmv/python-todo-app:latest'
             }
         }
     }
-
     post {
         always {
             cleanWs()
-            echo 'Build or tests completed!'
+        }
+        success {
+            echo 'Build and tests succeeded!'
         }
         failure {
             echo 'Build or tests failed!'
