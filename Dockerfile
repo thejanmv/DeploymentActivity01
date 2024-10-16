@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
+# Install pytest (if not listed in requirements.txt)
+RUN pip install pytest
+
 # Define environment variable
 ENV NAME World
 
