@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'thejanmv/to-do-app'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'  // The Jenkins credentials ID for DockerHub
-        GITHUB_CREDENTIALS_ID = 'github-credentials'     // The Jenkins credentials ID for GitHub
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        GITHUB_CREDENTIALS_ID = 'github-credentials'
     }
 
     stages {
@@ -25,9 +25,10 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    dockerImage.inside {
+                    // Set the working directory explicitly to /app (Unix-style path) to avoid Windows path issues
+                    dockerImage.inside('-w /app') {
                         sh 'pytest --version'
-                        sh 'pytest'
+                        sh 'pytest'  // Run your tests inside the container
                     }
                 }
             }
@@ -37,10 +38,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        // Push the Docker image with the build number tag
                         dockerImage.push("${env.BUILD_NUMBER}")
-                        // Push the Docker image with the 'latest' tag
-                        dockerImage.push("latest")
+                        dockerImage.push('latest')
                     }
                 }
             }
@@ -49,7 +48,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()  // Clean up the workspace after the build
+            cleanWs()  // Clean up workspace after the build
         }
     }
 }
