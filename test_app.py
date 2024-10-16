@@ -12,7 +12,9 @@ def test_add_task():
     conn.commit()
     conn.close()
 
-    # Test valid input
-    response = client.post('/add', data={'task': 'Test Task'})
-    assert response.status_code == 302  # Redirect to index
-    assert response.location.endswith(url_for('index'))  # Ensure redirect to home page
+    # Create an application context
+    with app.app_context():
+        # Test valid input
+        response = client.post('/add', data={'task': 'Test Task'})
+        assert response.status_code == 302  # Redirect to index
+        assert response.location.endswith(url_for('index'))  # Ensure redirect to home page
