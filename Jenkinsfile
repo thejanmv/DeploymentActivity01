@@ -41,14 +41,8 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                sshagent(credentials: ['ec2-jenkins']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ec2-user@<EC2-PUBLIC-IP> << EOF
-                        docker stop $(docker ps -q)
-                        docker pull lithmiseneviratne/python-todo-app:latest
-                        docker run -d -p 80:5000 lithmiseneviratne/python-todo-app:latest
-                        EOF
-                    '''
+                sshagent(['ec2-jenkins']) {
+                    sh 'ssh -i /var/lib/jenkins/.ssh/new_key_pair.pem ec2-user@ec2-54-145-210-17.compute-1.amazonaws.com "uptime"'
                 }
             }
         }
