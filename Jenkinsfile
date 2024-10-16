@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'thejanmv/python-todo-app:latest'
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') 
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
     stages {
@@ -15,24 +15,24 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t ${DOCKER_IMAGE} .'
+                bat 'docker build -t %DOCKER_IMAGE% .'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'docker run --rm -w /app ${DOCKER_IMAGE} pytest'
+                bat 'docker run --rm %DOCKER_IMAGE% pytest'
             }
         }
 
         stage('Push to Docker Hub') {
             when {
-                expression { return currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
-                    bat 'docker push ${DOCKER_IMAGE}'
+                    bat 'docker push %DOCKER_IMAGE%'
                 }
             }
         }
@@ -43,7 +43,6 @@ pipeline {
             cleanWs()
             echo 'Build or tests completed!'
         }
-
         failure {
             echo 'Build or tests failed!'
         }
