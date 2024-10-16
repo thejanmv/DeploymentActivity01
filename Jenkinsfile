@@ -16,17 +16,16 @@ pipeline {
                 bat 'docker build -t thejanmv/python-todo-app:latest .'
             }
         }
-        stage('Test') {
-            when {
-                expression {
-                    return fileExists('tests') // Check if tests directory exists
+        stage('Run Tests') {
+            steps {
+                script {
+                    docker.image(DOCKER_IMAGE).inside {
+                        sh 'pytest tests/'
+                    }
                 }
             }
-            steps {
-                echo 'Running test...'
-                bat 'docker run --rm thejanmv/python-todo-app:latest pytest'
-            }
         }
+        
         stage('Push to Docker Hub') {
             when {
                 expression {
