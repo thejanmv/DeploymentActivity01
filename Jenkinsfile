@@ -1,50 +1,54 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')  // Jenkins DockerHub credentials
-        DOCKER_IMAGE = 'thejanmv/python-todo-app'  // Docker image name
+        DOCKER_IMAGE = 'thejanmv/python-todo-app:latest'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        GIT_CREDENTIALS_ID = 'github-credentials'
     }
-
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01.git'  // Git repository URL
+                git branch: 'main', url: 'https://github.com/thejanmv/DeploymentActivity01', credentialsId: "${GIT_CREDENTIALS_ID}"
             }
         }
-
-        stage('Build') {
+        
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE .'
+                    bat "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
         }
-
         stage('Test') {
             steps {
+                echo 'Running tests...'
                 script {
-                    // Run tests
-                    sh 'docker run $DOCKER_IMAGE ./run_tests.sh'  // Example: replace with your test command
+                    bat "docker run --rm ${DOCKER_IMAGE} pytest"
                 }
             }
         }
-
-        stage('Push to DockerHub') {
+        stage('Push to Docker Hub') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
             steps {
                 script {
-                    // Login to DockerHub and push image
-                    sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE'
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        bat "docker push ${DOCKER_IMAGE}"
+                    }
                 }
             }
         }
     }
-
     post {
         always {
-            cleanWs() // Clean workspace after the build
+            cleanWs()
+        }
+        failure {
+            echo 'Build or tests failed!'
+        }
+        success {
+            echo 'Build and tests succeeded!'
         }
     }
 }
