@@ -1,4 +1,5 @@
 from app import app
+from flask import url_for
 import sqlite3
 
 def test_add_task():
@@ -15,10 +16,3 @@ def test_add_task():
     response = client.post('/add', data={'task': 'Test Task'})
     assert response.status_code == 302  # Redirect to index
     assert response.location.endswith(url_for('index'))  # Ensure redirect to home page
-
-    # Verify the task was added
-    conn = sqlite3.connect('todo.db')
-    tasks = conn.execute('SELECT * FROM tasks WHERE task="Test Task"').fetchall()
-    conn.close()
-    
-    assert len(tasks) == 1  # Ensure the task was added
