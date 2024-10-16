@@ -16,7 +16,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    bat 'docker run -d -p 5005:5000 lithmiseneviratne/python-todo-app:65'
+                    bat 'docker run -d -p 0:5000 lithmiseneviratne/python-todo-app:65'
                 }
             }
         }
