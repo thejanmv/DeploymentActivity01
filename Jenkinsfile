@@ -25,11 +25,9 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Set the working directory explicitly to /app (Unix-style path) to avoid Windows path issues
-                    dockerImage.inside('-w /app') {
-                        sh 'pytest --version'
-                        sh 'pytest'  // Run your tests inside the container
-                    }
+                    // Run the Docker container and execute pytest
+                    bat "docker run --rm ${DOCKER_IMAGE}:${env.BUILD_NUMBER} pytest --version"
+                    bat "docker run --rm ${DOCKER_IMAGE}:${env.BUILD_NUMBER} pytest"
                 }
             }
         }
