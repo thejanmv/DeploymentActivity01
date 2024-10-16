@@ -14,22 +14,12 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
-                }
-            }
-        }
-
         stage('Test') {
             steps {
                 script {
-                    // Set the working directory explicitly to /app (Unix-style path) to avoid Windows path issues
-                    dockerImage.inside('-w /app') {
-                        sh 'pytest --version'
-                        sh 'pytest'  // Run your tests inside the container
-                    }
+                    // Use the Docker image v1.0 for running tests
+                    bat "docker run --rm ${DOCKER_IMAGE}:v1.0 pytest --version"
+                    bat "docker run --rm ${DOCKER_IMAGE}:v1.0 pytest"
                 }
             }
         }
