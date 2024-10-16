@@ -25,7 +25,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
-                        bat "docker push lithmi/python-todo-app:65"
+                        bat "docker push lithmiseneviratne02/python-todo-app:65"
                     }
                 }
             }
