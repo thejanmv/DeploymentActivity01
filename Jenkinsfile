@@ -14,15 +14,16 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                script {
-                    // Use the Docker image v1.0 for running tests
-                    bat "docker run --rm ${DOCKER_IMAGE}:v1.0 pytest --version"
-                    bat "docker run --rm ${DOCKER_IMAGE}:v1.0 pytest"
+    stage('Test') {
+        steps {
+            script {
+                dockerImage.inside {
+                    // Ensure pytest runs inside the 'tests' directory
+                    sh 'pytest tests/'
                 }
             }
         }
+    }
 
         stage('Push to Docker Hub') {
             steps {
