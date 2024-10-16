@@ -25,10 +25,10 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Use a Unix-style path for Docker when running on Windows
+                    // Set the working directory explicitly to /app (Unix-style path) to avoid Windows path issues
                     dockerImage.inside('-w /app') {
                         sh 'pytest --version'
-                        sh 'pytest'  // Run tests inside the Docker container
+                        sh 'pytest'  // Run your tests inside the container
                     }
                 }
             }
@@ -48,7 +48,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()  // Clean up workspace after build
+            cleanWs()  // Clean up workspace after the build
         }
     }
 }
