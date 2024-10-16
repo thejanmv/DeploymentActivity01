@@ -19,13 +19,15 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    docker.image(DOCKER_IMAGE).inside {
-                        sh 'pytest tests/'
+                    docker.image(DOCKER_IMAGE).inside('-w /app') {
+                        bat 'pytest tests/'
                     }
                 }
             }
         }
-        
+
+
+
         stage('Push to Docker Hub') {
             when {
                 expression {
