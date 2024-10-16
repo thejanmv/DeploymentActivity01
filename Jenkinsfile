@@ -25,7 +25,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside {
+                    docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside('-v /var/run/docker.sock:/var/run/docker.sock') {
                         sh 'pytest'
                     }
                 }
