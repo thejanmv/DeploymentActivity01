@@ -6,6 +6,8 @@ pipeline {
         DOCKER_CREDENTIALS = "dockerhub-credentials"
         SSH_CREDENTIALS = "ec2-key"
         EC2_HOST = "ec2-user@ec2-54-145-210-17.compute-1.amazonaws.com"
+        CONTAINER_NAME = 'python-todo-app'
+        PORT = '5000
     }
     
     stages {
@@ -24,7 +26,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    bat 'docker run -d -p 0:5000 lithmiseneviratne/python-todo-app:65'
+                    sh "docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${DOCKER_IMAGE}"
                 }
             }
         }
