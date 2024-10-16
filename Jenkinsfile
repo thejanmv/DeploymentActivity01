@@ -1,24 +1,22 @@
 pipeline {
     agent any
+
     environment {
-        // Ensure the Docker image name follows the naming conventions
-        DOCKER_IMAGE = 'thejanmv/python-todo-app'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
-        GIT_CREDENTIALS_ID = 'github-credentials'
+        DOCKER_IMAGE = 'thejanmv/python-todo-app:latest' // Ensure this follows the pattern '^[a-zA-Z0-9]+((\.|_|__|-+)[a-zA-Z0-9]+)*$'
+        //DOCKER_REGISTRY = 'your-docker-registry'
+        DOCKER_CREDENTIALS_ID = 'your-docker-credentials-id'
     }
+
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    checkout scm
-                }
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Use the BUILD_ID for tagging to ensure unique tags for each build
                     docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
@@ -28,7 +26,6 @@ pipeline {
             steps {
                 script {
                     docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside {
-                        // Use 'sh' for shell commands on Unix-like systems
                         sh 'pytest'
                     }
                 }
@@ -42,6 +39,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS_ID}") {
+                        // Debugging step to print the Docker image name
+                        echo "Pushing Docker image: ${DOCKER_IMAGE}:${env.BUILD_ID}"
                         // Push the image with the latest tag
                         docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").push('latest')
                     }
@@ -49,6 +48,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             cleanWs()
