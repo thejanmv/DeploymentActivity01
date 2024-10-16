@@ -1,5 +1,6 @@
-import pytest
-from app import app  
+import sys
+sys.path.insert(0, '/app')
+from app import app
 
 @pytest.fixture
 def client():
