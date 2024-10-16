@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     dockerImage.inside {
-                        // Replace this with your actual test command
+                        sh 'pytest --version'
                         sh 'pytest'
                     }
                 }
