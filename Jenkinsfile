@@ -9,14 +9,14 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat 'docker build -t 104050025@student.swin.edu.au/python-todo-app:65 .'
+                    bat 'docker build -t 104050025/python-todo-app:65 .'
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 script {
-                    bat 'docker run -d -p 0:5000 104050025@student.swin.edu.au/python-todo-app:65'
+                    bat 'docker run -d -p 0:5000 104050025/python-todo-app:65'
                 }
             }
         }
@@ -25,7 +25,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
-                        bat "docker push 104050025@student.swin.edu.au/python-todo-app:65"
+                        bat "docker push 104050025/python-todo-app:65"
                     }
                 }
             }
