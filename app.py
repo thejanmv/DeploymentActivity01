@@ -1,21 +1,30 @@
 from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
+import mysql.connector
 
 app = Flask(__name__)
 
-DATABASE = 'todo.db'
+# Database configuration
+DB_HOST = 'localhost'
+DB_USER = 'todo_user'
+DB_PASSWORD = 'root123'
+DB_NAME = 'todo_db'
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn = mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
+    )
     return conn
 
 def create_table():
     conn = get_db_connection()
-    conn.execute('''
+    cursor = conn.cursor()
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task TEXT NOT NULL
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            task VARCHAR(255) NOT NULL
         )
     ''')
     conn.commit()
@@ -24,7 +33,9 @@ def create_table():
 @app.route('/')
 def index():
     conn = get_db_connection()
-    tasks = conn.execute('SELECT * FROM tasks').fetchall()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM tasks')
+    tasks = cursor.fetchall()
     conn.close()
     return render_template('index.html', tasks=tasks)
 
@@ -32,7 +43,8 @@ def index():
 def add_task():
     new_task = request.form['task']
     conn = get_db_connection()
-    conn.execute('INSERT INTO tasks (task) VALUES (?)', (new_task,))
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO tasks (task) VALUES (%s)', (new_task,))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
@@ -40,11 +52,12 @@ def add_task():
 @app.route('/delete/<int:id>')
 def delete_task(id):
     conn = get_db_connection()
-    conn.execute('DELETE FROM tasks WHERE id = ?', (id,))
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM tasks WHERE id = %s', (id,))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    create_table()  # Ensure the table is created
+    create_table()
     app.run(debug=True, host='0.0.0.0')

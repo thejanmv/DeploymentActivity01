@@ -3,27 +3,31 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/thejanmv/DeploymentActivity01', credentialsId: 'github-credentials'
+                git url: 'https://github.com/thejanmv/DeploymentActivity01.git', credentialsId: 'github-credentials'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat 'docker build -t "thejanmv/python-todo-app:65" .'
+                    bat 'docker build -t lithmiseneviratne/python-todo-app:65 .'
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 script {
-                    bat 'docker run -d -t -w /app -v C:/ProgramData/Jenkins/.jenkins/workspace/CI-Pipeline:/app thejanmv/python-todo-app:65'
+                    bat 'docker run --rm -d -p 5000:5000 lithmiseneviratne/python-todo-app:65'
+                    // Add any test commands you need here
                 }
             }
         }
         stage('Push Docker Image') {
             steps {
                 script {
-                    bat 'docker push thejanmv/python-todo-app:65'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+                        bat "docker push lithmiseneviratne/python-todo-app:65"
+                    }
                 }
             }
         }

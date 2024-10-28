@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-todo-app
+  namespace: default  
+spec:
+  replicas: 2  
+  selector:
+    matchLabels:
+      app: python-todo-app
+  template:
+    metadata:
+      labels:
+        app: python-todo-app
+    spec:
+      containers:
+      - name: python-todo-app-container
+        image: thejanmv/python-todo-app:65
+        ports:
+        - containerPort: 5000  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-todo-app-service
+  namespace: default  
+spec:
+  selector:
+    app: python-todo-app
+  ports:
+  - protocol: TCP
+    port: 80  
+    targetPort: 5000  
+  type: NodePort
