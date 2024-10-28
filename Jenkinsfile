@@ -27,6 +27,18 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['aws-ec2-credentials']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ec2-user@184.73.143.93 << EOF
+                    docker pull your-dockerhub-username/your-app-image:latest
+                    docker run -d -p 5000:5000 your-dockerhub-username/your-app-image
+                    EOF
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
