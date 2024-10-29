@@ -11,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t thejanmv/python-todo-app:65 .'
+                    sh 'docker build -t thejanmv/python-todo-app:latest .'
                 }
             }
         }
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker run --rm -d -p 5000:5000 --name test-container thejanmv/python-todo-app:65
+                        docker run --rm -d -p 5000:5000 --name test-container thejanmv/python-todo-app:latest
                         docker stop test-container
                     '''
                 }
@@ -33,7 +33,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh '''
                             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-                            docker push thejanmv/python-todo-app:65
+                            docker push thejanmv/python-todo-app:latest
                         '''
                     }
                 }
@@ -45,16 +45,16 @@ pipeline {
         sshagent(credentials: ['new-ec2-credentials']) {
             sh '''
                 ssh -o StrictHostKeyChecking=no ubuntu@<new-ec2-public-ip> << 'EOF'
-                docker pull thejanmv/python-todo-app:65 || exit 1
+                docker pull thejanmv/python-todo-app:latest || exit 1
 
                 # Stop the running container, if any
-                RUNNING_CONTAINER=$(docker ps -q --filter ancestor=thejanmv/python-todo-app:65)
+                RUNNING_CONTAINER=$(docker ps -q --filter ancestor=thejanmv/python-todo-app:latest)
                 if [ -n "$RUNNING_CONTAINER" ]; then
                     docker stop $RUNNING_CONTAINER
                 fi
 
                 # Run the new container
-                docker run -d -p 5000:5000 thejanmv/python-todo-app:65
+                docker run -d -p 5000:5000 thejanmv/python-todo-app:latest
                 EOF
             '''
         }
