@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     stages {
         stage('Checkout') {
             steps {
@@ -14,38 +15,42 @@ pipeline {
                 }
             }
         }
-        stage('Push Docker Image') {
+
+        stage('Run Tests') {
             steps {
                 script {
-                    sh 'docker push thejanmv/python-todo-app:65'
+                    sh '''
+                        docker run --rm -d -p 5000:5000 --name test-container thejanmv/python-todo-app:65
+                        docker stop test-container
+                    '''
                 }
             }
+        }
 
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh 'docker push thejanmv/python-todo-app:65'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh '''
+                            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                            docker push thejanmv/python-todo-app:65
+                        '''
+                    }
                 }
             }
         }
 
         stage('Deploy to EC2') {
-    steps {
-        sshagent(credentials: ['aws-ec2-credentials']) {
-            sh '''
-                ssh -o StrictHostKeyChecking=no ec2-user@184.73.143.93 << 'EOF'
-                docker pull thejanmv/python-todo-app:65 || exit 1
-                
-                # Stop the running container, if any
-                RUNNING_CONTAINER=$(docker ps -q --filter ancestor=thejanmv/python-todo-app:65)
-                if [ -n "$RUNNING_CONTAINER" ]; then
-                    docker stop $RUNNING_CONTAINER
-                fi
-                
-                # Run the new container
-                docker run -d -p 5000:5000 thejanmv/python-todo-app:65
-                EOF
-            '''
+            steps {
+                sshagent(credentials: ['aws-ec2-credentials']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ec2-user@184.73.143.93 << 'EOF'
+                        docker pull thejanmv/python-todo-app:65
+                        docker stop $(docker ps -q --filter ancestor=thejanmv/python-todo-app:65)
+                        docker run -d -p 5000:5000 thejanmv/python-todo-app:65
+                        EOF
+                    '''
+                }
             }
         }
     }
