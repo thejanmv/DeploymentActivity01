@@ -14,6 +14,20 @@ pipeline {
                 }
             }
         }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh 'docker push thejanmv/python-todo-app:65'
+                }
+            }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh 'docker push thejanmv/python-todo-app:65'
+                }
+            }
+        }
 
         stage('Deploy to EC2') {
     steps {
@@ -32,28 +46,6 @@ pipeline {
                 docker run -d -p 5000:5000 thejanmv/python-todo-app:65
                 EOF
             '''
-        }
-    }
-}
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    sh 'docker push thejanmv/python-todo-app:65'
-                }
-            }
-        }
-
-        stage('Deploy to EC2') {
-            steps {
-                sshagent(['aws-ec2-credentials']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ec2-user@184.73.143.93 << EOF
-                    docker pull thejanmv/python-todo-app:65
-                    docker run -d -p 5000:5000 thejanmv/python-todo-app:65
-                    EOF
-                    '''
-                }
-            }
         }
     }
 
