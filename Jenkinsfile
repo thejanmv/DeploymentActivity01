@@ -44,16 +44,16 @@ pipeline {
             steps {
                 sshagent(credentials: ['new-ec2-credentials']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@204.236.244.250 '
+                        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 ubuntu@204.236.244.250 '
                             docker pull thejanmv/python-todo-app:latest || exit 1
-
+        
                             # Stop the running container, if any
                             RUNNING_CONTAINER=\$(docker ps -q --filter ancestor=thejanmv/python-todo-app:latest)
-                            if [ -n \"\$RUNNING_CONTAINER\" ]; then
+                            if [ -n "\$RUNNING_CONTAINER" ]; then
                                 docker stop \$RUNNING_CONTAINER
                                 docker rm \$RUNNING_CONTAINER
                             fi
-
+        
                             # Run the new container
                             docker run -d -p 5000:5000 thejanmv/python-todo-app:latest
                         '
@@ -61,6 +61,7 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {
