@@ -43,20 +43,20 @@ pipeline {
         stage('Deploy to New EC2') {
             steps {
                 sshagent(credentials: ['new-ec2-credentials']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@<new-ec2-public-ip> '
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@<new-ec2-public-ip> "
                             docker pull thejanmv/python-todo-app:latest || exit 1
 
                             # Stop the running container, if any
-                            RUNNING_CONTAINER=$(docker ps -q --filter ancestor=thejanmv/python-todo-app:latest)
-                            if [ -n "$RUNNING_CONTAINER" ]; then
-                                docker stop $RUNNING_CONTAINER
+                            RUNNING_CONTAINER=\$(docker ps -q --filter ancestor=thejanmv/python-todo-app:latest)
+                            if [ -n \"\$RUNNING_CONTAINER\" ]; then
+                                docker stop \$RUNNING_CONTAINER
                             fi
 
                             # Run the new container
                             docker run -d -p 5000:5000 thejanmv/python-todo-app:latest
-                        '
-                    '''
+                        "
+                    """
                 }
             }
         }
