@@ -46,6 +46,7 @@ pipeline {
                 docker run -d -p 5000:5000 thejanmv/python-todo-app:65
                 EOF
             '''
+            }
         }
     }
 
