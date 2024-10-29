@@ -44,7 +44,7 @@ pipeline {
             steps {
                 sshagent(credentials: ['new-ec2-credentials']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@<new-ec2-public-ip> "
+                        ssh -o StrictHostKeyChecking=no ubuntu@204.236.244.250 "
                             docker pull thejanmv/python-todo-app:latest || exit 1
 
                             # Stop the running container, if any
