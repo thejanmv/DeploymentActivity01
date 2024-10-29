@@ -51,6 +51,7 @@ pipeline {
                             RUNNING_CONTAINER=\$(docker ps -q --filter ancestor=thejanmv/python-todo-app:latest)
                             if [ -n \"\$RUNNING_CONTAINER\" ]; then
                                 docker stop \$RUNNING_CONTAINER
+                                docker rm \$RUNNING_CONTAINER
                             fi
 
                             # Run the new container
